@@ -10,12 +10,11 @@ class ParticleWorld:
     self.x_size = 4.3
     self.y_size = 4.3
 
-    self.lattice = np.array([0, 0])
+    self.lattice = np.array([])
 
     self.create_lattice()
     self.plot_lattice()
 
-    pass
 
 
   def create_lattice(self):
@@ -27,16 +26,19 @@ class ParticleWorld:
     a1 = 1.07457 * np.array([1, 0])
     a2 = 1.07457 * np.array([.5, .8660254])
 
-    for i in range(4):
-      for j in range(4):
-        self.lattice = np.vstack((self.lattice, np.array([i*a1 , j*a2])))
+    for i in range(1,5):
+      for j in range(1,5):
+        if self.lattice.size == 0:
+          self.lattice = np.append(self.lattice, np.array([i*a1 + j*a2]))
+        else:
+          self.lattice = np.vstack((self.lattice, np.array([i*a1 + j*a2])))
 
-    pass
 
 
   def plot_lattice(self):
     print(self.lattice)
-    plt.plot(self.lattice, '.')
+    for point in self.lattice:
+      plt.plot(point[0], point[1], '.')
     plt.show()
 
 
