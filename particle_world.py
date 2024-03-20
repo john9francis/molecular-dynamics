@@ -6,9 +6,10 @@ class ParticleWorld:
   Creates a world with periodic boundary conditions
   '''
 
-  def __init__(self) -> None:
-    self.x_size = 4.3
-    self.y_size = 4.3
+  def __init__(self, n_particles=36) -> None:
+    self.width = int(n_particles ** .5)
+
+    self.n_particles = self.width ** 2
 
     self.lattice = np.array([])
 
@@ -26,14 +27,14 @@ class ParticleWorld:
     a1 = 1.07457 * np.array([1, 0])
     a2 = 1.07457 * np.array([.5, .8660254])
 
-    for i in range(1,5):
-      for j in range(1,5):
+    for i in range(self.width):
+      for j in range(self.width):
         if self.lattice.size == 0:
           self.lattice = np.append(self.lattice, np.array([i*a1 + j*a2]))
         else:
           self.lattice = np.vstack((self.lattice, np.array([i*a1 + j*a2])))
 
-    self.enforce_periodic_boundary_conditions(self.lattice, [a1, a2], self.x_size, self.y_size)
+    self.enforce_periodic_boundary_conditions(self.lattice, [a1, a2], self.width, self.width)
     
 
 
