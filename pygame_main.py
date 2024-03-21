@@ -1,6 +1,7 @@
 # a main file that runs an animation with pygame
 
 import pygame
+from particle_world import ParticleWorld
 
 def main():
 
@@ -17,6 +18,9 @@ def main():
   BLACK = (0, 0, 0)
   WHITE = (255, 255, 255)
 
+  # set up our own stuff
+  p_world = ParticleWorld()
+
   # Main game loop
   running = True
   while running:
@@ -27,6 +31,13 @@ def main():
 
     # Clear the screen
     screen.fill(BLACK)
+
+    # draw the particles
+    scale = 150
+
+    for p in p_world.lattice:
+      pygame.draw.rect(screen, WHITE, (p[0] * scale, p[1] * scale, 10, 10))
+
 
     # Update the display
     pygame.display.flip()

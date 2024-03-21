@@ -14,7 +14,6 @@ class ParticleWorld:
     self.lattice = np.array([])
 
     self.create_lattice()
-    self.plot_lattice()
 
 
 
