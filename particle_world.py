@@ -40,7 +40,7 @@ class ParticleWorld:
 
   def enforce_periodic_boundary_conditions(self, 
   positions_array, 
-  lattice_vectors, 
+  lattice_vectors:np.ndarray, 
   x_max, 
   y_max,
   x_min=0, 
@@ -71,7 +71,6 @@ class ParticleWorld:
 
 
   def plot_lattice(self):
-    print(self.lattice)
     for point in self.lattice:
       plt.plot(point[0], point[1], '.')
     plt.show()
@@ -83,22 +82,35 @@ class ParticleWorld:
     lennard jones potential force
     '''
     return 24 * (2 / (r ** 13) - 1 / (r ** 7))
-  
-  def plot_lennard_jones(self):
-    r = np.arange(.1, 6, .001)
-    y = self.lennard_jones_force(r)
-
-    plt.plot(r, y)
-    plt.ylim(-3, 5)
-    plt.show()
 
 
-  def calculate_net_force(self, particle_indx):
+
+  def calculate_net_force(self, particle_indx) -> np.ndarray:
     '''
     Takes in a particle index and calculates the net
     force on that particle from the other particles
+    returns a vector of [force_x, force_y]
     '''
-    pass
+
+    # check for errors
+    if particle_indx > len(self.lattice):
+      print("!!!get_f_on_particle error!!! trying to get particle indx out of bounds")
+      return None
+    
+    particle_pos = self.lattice[particle_indx]
+    # particle_list = np.copy(self.lattice)
+    particle_list = np.array([[4,4],[3.5,1.5],[0.5,2]])
+    print(particle_list)
+
+    # enforce periodic boundary conditions with the positions
+    particle_list = self.enforce_periodic_boundary_conditions(
+      particle_list,
+      (self.width / (self.width / 2 + particle_pos[0])) * np.array([[1,0],[0,1]]),
+      self.width / 2 + particle_pos[0],
+      self.width / 2 + particle_pos[1],
+    )
+    print(particle_list)
+
 
 
   def verlet_method(self, old_array:np.ndarray) -> np.ndarray:
