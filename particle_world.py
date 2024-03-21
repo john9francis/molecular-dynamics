@@ -19,6 +19,7 @@ class ParticleWorld:
     self.velocities = np.empty_like(self.lattice)
     self.velocities = self.create_random_velocities(self.v0, self.velocities)
     self.previous_lattice = self.lattice - self.velocities * self.dt
+    self.next_lattice = np.empty_like(self.lattice)
 
     print("Initial velocities:")
     print(self.velocities)
@@ -190,4 +191,12 @@ class ParticleWorld:
 
     
     pass
+
+
+  def update(self):
+    '''
+    Updates positions based on the verlet method
+    '''
+    pass
+
 
