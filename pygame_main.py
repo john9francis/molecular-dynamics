@@ -32,7 +32,7 @@ def main():
     # Clear the screen
     screen.fill(BLACK)
 
-    # draw the particles
+    # draw the particles NOTE: y=0 is at the top of the screen, not the bottom
     scale = 150
 
     for p in p_world.lattice:

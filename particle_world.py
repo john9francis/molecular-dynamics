@@ -11,13 +11,11 @@ class ParticleWorld:
 
     self.n_particles = self.width ** 2
 
-    self.lattice = np.array([])
-
-    self.create_lattice()
+    self.lattice = self.create_random_lattice()
 
 
 
-  def create_lattice(self):
+  def create_lattice(self) -> np.ndarray:
     '''
     Generate a triangular lattice using basis vectors
     1.07457*(1,0) and 1.07457*(.5, .8660254)
@@ -26,15 +24,37 @@ class ParticleWorld:
     a1 = 1.07457 * np.array([1, 0])
     a2 = 1.07457 * np.array([.5, .8660254])
 
+    new_lattice = np.array([])
+
     for i in range(self.width):
       for j in range(self.width):
-        if self.lattice.size == 0:
-          self.lattice = np.append(self.lattice, np.array([i*a1 + j*a2]))
+        if new_lattice.size == 0:
+          new_lattice = np.append(new_lattice, np.array([i*a1 + j*a2]))
         else:
-          self.lattice = np.vstack((self.lattice, np.array([i*a1 + j*a2])))
+          new_lattice = np.vstack((new_lattice, np.array([i*a1 + j*a2])))
 
-    self.enforce_periodic_boundary_conditions(self.lattice, [a1, a2], self.width, self.width)
+    return self.enforce_periodic_boundary_conditions(new_lattice, [a1, a2], self.width, self.width)
     
+
+  def create_random_lattice(self, not_random_lattice:np.ndarray=None) -> np.ndarray:
+    '''
+    Takes in a lattice and randomizes it a bit
+    '''
+    if not_random_lattice == None:
+      random_lattice = self.create_lattice()
+    else:
+      random_lattice = np.copy(not_random_lattice)
+
+    for i in range(len(random_lattice)):
+      r = np.random.uniform(0, 0.5)
+      theta = np.random.uniform(0, 2 * np.pi)
+      x = r * np.cos(theta)
+      y = r * np.sin(theta)
+
+      random_lattice[i] = random_lattice[i] + np.array([x, y])
+
+    return random_lattice
+
 
 
   def enforce_periodic_boundary_conditions(self, 
