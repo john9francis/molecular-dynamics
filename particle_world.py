@@ -77,3 +77,34 @@ class ParticleWorld:
     plt.show()
 
 
+  def lennard_jones_force(self, r):
+    '''
+    Takes in a distance r and calculates the
+    lennard jones potential force
+    '''
+    return 24 * (2 / (r ** 13) - 1 / (r ** 7))
+  
+  def plot_lennard_jones(self):
+    r = np.arange(.1, 6, .001)
+    y = self.lennard_jones_force(r)
+
+    plt.plot(r, y)
+    plt.ylim(-3, 5)
+    plt.show()
+
+
+  def calculate_net_force(self, particle_indx):
+    '''
+    Takes in a particle index and calculates the net
+    force on that particle from the other particles
+    '''
+    pass
+
+
+  def verlet_method(self, old_array:np.ndarray) -> np.ndarray:
+    '''
+    Uses the verlet method to calculate the next spot for
+    all particles in the particle array
+    '''
+    pass
+
