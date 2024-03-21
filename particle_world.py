@@ -6,7 +6,7 @@ class ParticleWorld:
   Creates a world with periodic boundary conditions
   '''
 
-  def __init__(self, n_particles=36) -> None:
+  def __init__(self, n_particles=25) -> None:
     self.width = int(n_particles ** .5)
 
     self.n_particles = self.width ** 2
@@ -85,7 +85,7 @@ class ParticleWorld:
 
 
 
-  def calculate_net_force(self, particle_indx) -> np.ndarray:
+  def calculate_net_force(self, particle_pos_list, particle_indx, box_size) -> np.ndarray:
     '''
     Takes in a particle index and calculates the net
     force on that particle from the other particles
@@ -97,19 +97,48 @@ class ParticleWorld:
       print("!!!get_f_on_particle error!!! trying to get particle indx out of bounds")
       return None
     
-    particle_pos = self.lattice[particle_indx]
-    # particle_list = np.copy(self.lattice)
-    particle_list = np.array([[4,4],[3.5,1.5],[0.5,2]])
-    print(particle_list)
+    particle_pos = particle_pos_list[particle_indx]
 
     # enforce periodic boundary conditions with the positions
-    particle_list = self.enforce_periodic_boundary_conditions(
-      particle_list,
-      (self.width / (self.width / 2 + particle_pos[0])) * np.array([[1,0],[0,1]]),
-      self.width / 2 + particle_pos[0],
-      self.width / 2 + particle_pos[1],
-    )
-    print(particle_list)
+    particle_xs = np.array([particle_pos_list[:,0]])
+    particle_ys = np.array([particle_pos_list[:,1]])
+
+    for i in range(len(particle_xs[0])): # note: particle_xs is a 2d array thus the [0]
+        
+      if particle_pos[0] - particle_xs[0][i] < - box_size / 2:
+        particle_xs[0][i] -= box_size
+          
+      elif particle_pos[0] - particle_xs[0][i] > box_size / 2:
+        particle_xs[0][i] += box_size
+          
+    for j in range(len(particle_ys[0])): # note: particle_xs is a 2d array thus the [0]
+        
+      if particle_pos[0] - particle_ys[0][j] < - box_size / 2:
+        particle_ys[0][j] -= box_size
+          
+      elif particle_pos[0] - particle_ys[0][j] > box_size / 2:
+        particle_ys[0][j] += box_size
+
+    # Calculate total force now
+    total_force = np.array([0,0])
+
+    for pos in particle_pos_list:
+      # don't calculate force with itsself
+      if np.array_equal(pos, particle_pos):
+        continue
+
+      distance = pos - particle_pos
+
+      r = np.sqrt(distance[0]**2 + distance[1]**2)
+      direction = distance / r
+
+      force = self.lennard_jones_force(r) * direction
+
+      total_force = total_force + force
+
+    return total_force
+
+
 
 
 
