@@ -13,6 +13,16 @@ class ParticleWorld:
 
     self.lattice = self.create_random_lattice()
 
+    self.v0 = 1
+    self.dt = .01
+
+    self.velocities = np.empty_like(self.lattice)
+    self.velocities = self.create_random_velocities(self.v0, self.velocities)
+    self.previous_lattice = self.lattice - self.velocities * self.dt
+
+    print("Initial velocities:")
+    print(self.velocities)
+
 
 
   def create_lattice(self) -> np.ndarray:
@@ -95,6 +105,17 @@ class ParticleWorld:
     plt.show()
 
 
+  def create_random_velocities(self, init_v, v_array):
+    '''
+    Creates an array of random velocities all around init_v
+    '''
+    for i in range(len(v_array)):
+      v_array[i][0] = 2 * (np.random.uniform(0, 1) - .5) * init_v
+      v_array[i][1] = 2 * (np.random.uniform(0, 1) - .5) * init_v
+
+    return v_array
+
+
   def lennard_jones_force(self, r):
     '''
     Takes in a distance r and calculates the
@@ -166,5 +187,7 @@ class ParticleWorld:
     Uses the verlet method to calculate the next spot for
     all particles in the particle array
     '''
+
+    
     pass
 
