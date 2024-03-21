@@ -6,7 +6,8 @@ from particle_world import ParticleWorld
 def main():
 
   # set up our own stuff
-  p_world = ParticleWorld()
+  p_world = ParticleWorld(36)
+  p_world.plot_lattice()
   scale = 100
   offset = 10
 
@@ -14,8 +15,8 @@ def main():
   pygame.init()
 
   # Set up the screen
-  screen_width = p_world.width * scale + 2 * offset
-  screen_height = p_world.width * scale + 2 * offset
+  screen_width = p_world.width * 1.5 * scale
+  screen_height = p_world.width * 1.5 * scale
   screen = pygame.display.set_mode((screen_width, screen_height))
   pygame.display.set_caption("Molecular Dynamics")
 
