@@ -1,5 +1,6 @@
 # a main file that runs an animation with pygame
 
+import time
 import pygame
 from particle_world import ParticleWorld
 
@@ -7,7 +8,6 @@ def main():
 
   # set up our own stuff
   p_world = ParticleWorld(36)
-  p_world.plot_lattice()
   scale = 100
   offset = 10
 
@@ -42,6 +42,8 @@ def main():
     for p in p_world.lattice:
       pygame.draw.rect(screen, WHITE, (p[0] * scale + offset, p[1] * scale + offset, 10, 10))
 
+    p_world.update()
+    time.sleep(.2)
 
     # Update the display
     pygame.display.flip()

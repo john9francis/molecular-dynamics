@@ -21,8 +21,8 @@ class ParticleWorld:
     self.previous_lattice = self.lattice - self.velocities * self.dt
     self.next_lattice = np.empty_like(self.lattice)
 
-    print("Initial velocities:")
-    print(self.velocities)
+    #print("Initial velocities:")
+    #print(self.velocities)
 
 
 
@@ -132,6 +132,8 @@ class ParticleWorld:
     force on that particle from the other particles
     returns a vector of [force_x, force_y]
     '''
+    # set the maximum r, above this, force = 0
+    rcut = 3
 
     # check for errors
     if particle_indx > len(self.lattice):
@@ -171,6 +173,11 @@ class ParticleWorld:
       distance = pos - particle_pos
 
       r = np.sqrt(distance[0]**2 + distance[1]**2)
+
+      # skip if the r is too big
+      if r > rcut:
+        continue
+
       direction = distance / r
 
       force = self.lennard_jones_force(r) * direction
@@ -178,6 +185,19 @@ class ParticleWorld:
       total_force = total_force + force
 
     return total_force
+
+
+  def calculate_force_array(self, pos_array):
+    '''
+    Returns an array of all the forces
+    '''
+    all_force_list = []
+
+    for i in range(len(pos_array)):
+      new_f = self.calculate_net_force(pos_array, i, self.width)
+      all_force_list.append(new_f)
+    
+    return np.array(all_force_list)
 
 
 
@@ -197,6 +217,11 @@ class ParticleWorld:
     '''
     Updates positions based on the verlet method
     '''
-    pass
-
+    f = self.calculate_force_array(self.lattice)
+    self.next_lattice = 2 * self.lattice - self.previous_lattice + f * self.dt
+    # self.next_lattice = self.enforce_periodic_boundary_conditions(self.next_lattice, )
+ 
+    # finally, reset the lattice variable
+    self.previous_lattice = np.copy(self.lattice)
+    self.lattice = np.copy(self.next_lattice)
 
