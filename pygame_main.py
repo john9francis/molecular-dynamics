@@ -8,15 +8,15 @@ def main():
 
   # set up our own stuff
   p_world = ParticleWorld(36)
+  p_world.plot_lattice()
   scale = 100
-  offset = 10
 
   # Initialize Pygame
   pygame.init()
 
   # Set up the screen
   screen_width = p_world.width * 1.5 * scale
-  screen_height = p_world.width * 1.5 * scale
+  screen_height = p_world.height * 1.5 * scale
   screen = pygame.display.set_mode((screen_width, screen_height))
   pygame.display.set_caption("Molecular Dynamics")
 
@@ -40,10 +40,10 @@ def main():
     scale = 150
 
     for p in p_world.lattice:
-      pygame.draw.rect(screen, WHITE, (p[0] * scale + offset, p[1] * scale + offset, 10, 10))
+      pygame.draw.rect(screen, WHITE, (p[0] * scale, p[1] * scale, 10, 10))
 
     p_world.update()
-    time.sleep(.2)
+    time.sleep(.01)
 
     # Update the display
     pygame.display.flip()

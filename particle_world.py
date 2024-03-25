@@ -7,14 +7,17 @@ class ParticleWorld:
   '''
 
   def __init__(self, n_particles=25) -> None:
-    self.width = int(n_particles ** .5)
+    self.n_particles = int(n_particles ** .5) ** 2
 
-    self.n_particles = self.width ** 2
+    # width and height will be defined in self.create_lattice
+    self.width = 0 
+    self.height = 0
 
+    # self.lattice = self.create_random_lattice()
     self.lattice = self.create_random_lattice()
 
     self.v0 = 1
-    self.dt = .01
+    self.dt = .001
 
     self.velocities = np.empty_like(self.lattice)
     self.velocities = self.create_random_velocities(self.v0, self.velocities)
@@ -37,14 +40,25 @@ class ParticleWorld:
 
     new_lattice = np.array([])
 
-    for i in range(self.width):
-      for j in range(self.width):
+    n = int(self.n_particles ** .5)
+
+    for i in range(n):
+      for j in range(n):
         if new_lattice.size == 0:
           new_lattice = np.append(new_lattice, np.array([i*a1 + j*a2]))
         else:
           new_lattice = np.vstack((new_lattice, np.array([i*a1 + j*a2])))
 
-    return self.enforce_periodic_boundary_conditions(new_lattice, [a1, a2], self.width, self.width)
+    # set width and height
+    scale = 1
+    self.width = scale * n * a1[0]
+    self.height = scale * n * a2[1]
+
+    offset = .5
+
+    new_lattice = new_lattice + offset
+
+    return self.enforce_periodic_boundary_conditions(new_lattice)
     
 
   def create_random_lattice(self, not_random_lattice:np.ndarray=None) -> np.ndarray:
@@ -57,7 +71,7 @@ class ParticleWorld:
       random_lattice = np.copy(not_random_lattice)
 
     for i in range(len(random_lattice)):
-      r = np.random.uniform(0, 0.5)
+      r = np.random.uniform(0, 0.01)
       theta = np.random.uniform(0, 2 * np.pi)
       x = r * np.cos(theta)
       y = r * np.sin(theta)
@@ -68,13 +82,7 @@ class ParticleWorld:
 
 
 
-  def enforce_periodic_boundary_conditions(self, 
-  positions_array, 
-  lattice_vectors:np.ndarray, 
-  x_max, 
-  y_max,
-  x_min=0, 
-  y_min=0):
+  def enforce_periodic_boundary_conditions(self, positions_array):
     '''
     If a particle's position is beyond the x_max, it shifts it back x_max points. 
     NOTE: This is dangerous, because if there are too many particles to fit in 
@@ -88,10 +96,15 @@ class ParticleWorld:
       pos_x = positions_array[i][0]
       pos_y = positions_array[i][1]
 
-      if pos_x > x_max:
-        pos_x -= x_max * lattice_vectors[0][0]
-      if pos_y > y_max:
-        pos_y -= y_max * lattice_vectors[1][1]
+      if pos_x > self.width:
+        pos_x -= self.width
+      if pos_x < 0:
+        pos_x += self.width
+        
+      if pos_y > self.height:
+        pos_y -= self.height
+      if pos_y < 0:
+        pos_y += self.height
 
       positions_array[i] = np.array([pos_x, pos_y])
 
@@ -125,12 +138,40 @@ class ParticleWorld:
     return 24 * (2 / (r ** 13) - 1 / (r ** 7))
 
 
+  def closest(self, positions_array, particle_indx):
+    '''
+    Better name needed!
+    '''
+    # copy to not affect the original array
+    pos_array = np.copy(positions_array)
+
+    # grab the particle pos for later
+    particle_pos = pos_array[particle_indx]
+
+    # delete THIS particle so we don't get the force with itself.
+    pos_array = np.delete(pos_array, particle_indx, 0)
+
+    # ERICS CODE:
+    # p = positions[particle_indx]
+    # positions = np.delete(positions, particle_indx, 0)
+    # positions[abs(positions-p) > 2.5] += 5
+    # positions[abs(positions-p) > 2.5] -= 10
+    # return p - positions
+    
+
 
   def calculate_net_force(self, particle_pos_list, particle_indx, box_size) -> np.ndarray:
     '''
     Takes in a particle index and calculates the net
     force on that particle from the other particles
     returns a vector of [force_x, force_y]
+
+
+
+    Wrap around boundary conditions:
+    I need to use the self.closest function!!!
+
+
     '''
     # set the maximum r, above this, force = 0
     rcut = 3
@@ -170,7 +211,7 @@ class ParticleWorld:
       if np.array_equal(pos, particle_pos):
         continue
 
-      distance = pos - particle_pos
+      distance = - (pos - particle_pos)
 
       r = np.sqrt(distance[0]**2 + distance[1]**2)
 
@@ -196,21 +237,10 @@ class ParticleWorld:
     for i in range(len(pos_array)):
       new_f = self.calculate_net_force(pos_array, i, self.width)
       all_force_list.append(new_f)
+
     
     return np.array(all_force_list)
 
-
-
-
-
-  def verlet_method(self, old_array:np.ndarray) -> np.ndarray:
-    '''
-    Uses the verlet method to calculate the next spot for
-    all particles in the particle array
-    '''
-
-    
-    pass
 
 
   def update(self):
@@ -218,8 +248,8 @@ class ParticleWorld:
     Updates positions based on the verlet method
     '''
     f = self.calculate_force_array(self.lattice)
-    self.next_lattice = 2 * self.lattice - self.previous_lattice + f * self.dt
-    # self.next_lattice = self.enforce_periodic_boundary_conditions(self.next_lattice, )
+    self.next_lattice = 2 * self.lattice - self.previous_lattice + f * self.dt ** 2
+    self.next_lattice = self.enforce_periodic_boundary_conditions(self.next_lattice)
  
     # finally, reset the lattice variable
     self.previous_lattice = np.copy(self.lattice)
