@@ -6,7 +6,7 @@ class ParticleWorld:
   Creates a world with periodic boundary conditions
   '''
 
-  def __init__(self, n_particles=25, random_displacement=.5) -> None:
+  def __init__(self, n_particles=25, random_displacement=.1, padding=0.1) -> None:
     self.n_particles = int(n_particles ** .5) ** 2
 
     # width and height will be defined in self.create_lattice
@@ -16,8 +16,11 @@ class ParticleWorld:
     # self.lattice = self.create_random_lattice()
     self.lattice = self.create_random_lattice(random_displacement)
 
-    self.v0 = 1
-    self.dt = .0005
+    # pad the edges
+    self.pad_edges(padding)
+
+    self.v0 = 0
+    self.dt = .001
 
     self.velocities = np.empty_like(self.lattice)
     self.velocities = self.create_random_velocities(self.v0, self.velocities)
@@ -27,6 +30,17 @@ class ParticleWorld:
     #print("Initial velocities:")
     #print(self.velocities)
 
+
+  def pad_edges(self, padding=1):
+    '''
+    shift the lattice, and shift the width and height
+    '''
+    offset = padding
+    
+    self.width += offset * 2
+    self.height += offset * 2
+
+    self.lattice += offset
 
 
   def create_lattice(self) -> np.ndarray:
@@ -38,8 +52,8 @@ class ParticleWorld:
     a1 = 1.07457 * np.array([1, 0])
     a2 = 1.07457 * np.array([.5, .8660254])
 
-    a1 = np.array([.9, 0])
-    a2 = np.array([0, .9])
+    a1 = np.array([1, 0])
+    a2 = np.array([0, 1])
 
     new_lattice = np.array([])
 
