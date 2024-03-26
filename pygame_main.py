@@ -7,7 +7,7 @@ from particle_world import ParticleWorld
 def main():
 
   # set up our own stuff
-  p_world = ParticleWorld(36)
+  p_world = ParticleWorld(36, random_displacement=.2)
   #p_world.plot_lattice()
   scale = 100
 

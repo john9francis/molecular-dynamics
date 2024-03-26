@@ -6,7 +6,7 @@ class ParticleWorld:
   Creates a world with periodic boundary conditions
   '''
 
-  def __init__(self, n_particles=25) -> None:
+  def __init__(self, n_particles=25, random_displacement=.5) -> None:
     self.n_particles = int(n_particles ** .5) ** 2
 
     # width and height will be defined in self.create_lattice
@@ -14,7 +14,7 @@ class ParticleWorld:
     self.height = 0
 
     # self.lattice = self.create_random_lattice()
-    self.lattice = self.create_random_lattice()
+    self.lattice = self.create_random_lattice(random_displacement)
 
     self.v0 = 1
     self.dt = .001
@@ -61,7 +61,7 @@ class ParticleWorld:
     return self.enforce_periodic_boundary_conditions(new_lattice)
     
 
-  def create_random_lattice(self, not_random_lattice:np.ndarray=None) -> np.ndarray:
+  def create_random_lattice(self, random_displacement=.5, not_random_lattice:np.ndarray=None) -> np.ndarray:
     '''
     Takes in a lattice and randomizes it a bit
     '''
@@ -71,7 +71,7 @@ class ParticleWorld:
       random_lattice = np.copy(not_random_lattice)
 
     for i in range(len(random_lattice)):
-      r = np.random.uniform(0, 0.01)
+      r = np.random.uniform(0, random_displacement)
       theta = np.random.uniform(0, 2 * np.pi)
       x = r * np.cos(theta)
       y = r * np.sin(theta)
@@ -149,29 +149,24 @@ class ParticleWorld:
     # grab the particle pos for later
     particle_pos = pos_array[particle_indx]
 
-    # check the radii between the particle and the other positions
-    for i, pos in enumerate(pos_array):
-      if i == particle_indx:
-        continue
-      
-      
-
+    # delete THIS particle so we don't get the force with itself.
+    pos_array = np.delete(pos_array, particle_indx, 0)
 
     for i, pos in enumerate(pos_array):
 
       r = abs(particle_pos - pos_array[i])
       if r[0] > self.width / 2:
-        pos_array[i] += self.width
+        pos_array[i][0] = pos_array[i][0] + self.width
       if r[1] > self.height / 2:
-        pos_array[i] += self.height
+        pos_array[i][1] = pos_array[i][1] + self.height
 
     for i, pos in enumerate(pos_array):
 
       r = abs(particle_pos - pos_array[i])
       if r[0] > self.width / 2:
-        pos_array[i] -= 2 * self.width
+        pos_array[i][0] = pos_array[i][0] - 2 * self.width
       if r[1] > self.height / 2:
-        pos_array[i] -= 2 * self.height
+        pos_array[i][1] = pos_array[i][1] - 2 * self.height
 
     return particle_pos - pos_array
       
