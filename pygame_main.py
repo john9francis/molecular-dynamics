@@ -8,7 +8,7 @@ def main():
 
   # set up our own stuff
   p_world = ParticleWorld(36)
-  p_world.plot_lattice()
+  #p_world.plot_lattice()
   scale = 100
 
   # Initialize Pygame

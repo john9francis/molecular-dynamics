@@ -138,9 +138,10 @@ class ParticleWorld:
     return 24 * (2 / (r ** 13) - 1 / (r ** 7))
 
 
-  def closest(self, positions_array, particle_indx):
+  def get_periodic_r_array(self, positions_array, particle_indx):
     '''
-    Better name needed!
+    Gets the array r values, including the periodic boundary conditions
+    to get the "closest" r for each particle.
     '''
     # copy to not affect the original array
     pos_array = np.copy(positions_array)
@@ -148,15 +149,32 @@ class ParticleWorld:
     # grab the particle pos for later
     particle_pos = pos_array[particle_indx]
 
-    # delete THIS particle so we don't get the force with itself.
-    pos_array = np.delete(pos_array, particle_indx, 0)
+    # check the radii between the particle and the other positions
+    for i, pos in enumerate(pos_array):
+      if i == particle_indx:
+        continue
+      
+      
 
-    # ERICS CODE:
-    # p = positions[particle_indx]
-    # positions = np.delete(positions, particle_indx, 0)
-    # positions[abs(positions-p) > 2.5] += 5
-    # positions[abs(positions-p) > 2.5] -= 10
-    # return p - positions
+
+    for i, pos in enumerate(pos_array):
+
+      r = abs(particle_pos - pos_array[i])
+      if r[0] > self.width / 2:
+        pos_array[i] += self.width
+      if r[1] > self.height / 2:
+        pos_array[i] += self.height
+
+    for i, pos in enumerate(pos_array):
+
+      r = abs(particle_pos - pos_array[i])
+      if r[0] > self.width / 2:
+        pos_array[i] -= 2 * self.width
+      if r[1] > self.height / 2:
+        pos_array[i] -= 2 * self.height
+
+    return particle_pos - pos_array
+      
     
 
 
@@ -165,13 +183,6 @@ class ParticleWorld:
     Takes in a particle index and calculates the net
     force on that particle from the other particles
     returns a vector of [force_x, force_y]
-
-
-
-    Wrap around boundary conditions:
-    I need to use the self.closest function!!!
-
-
     '''
     # set the maximum r, above this, force = 0
     rcut = 3
@@ -180,48 +191,22 @@ class ParticleWorld:
     if particle_indx > len(self.lattice):
       print("!!!get_f_on_particle error!!! trying to get particle indx out of bounds")
       return None
-    
-    particle_pos = particle_pos_list[particle_indx]
 
-    # enforce periodic boundary conditions with the positions
-    particle_xs = np.array([particle_pos_list[:,0]])
-    particle_ys = np.array([particle_pos_list[:,1]])
 
-    for i in range(len(particle_xs[0])): # note: particle_xs is a 2d array thus the [0]
-        
-      if particle_pos[0] - particle_xs[0][i] < - box_size / 2:
-        particle_xs[0][i] -= box_size
-          
-      elif particle_pos[0] - particle_xs[0][i] > box_size / 2:
-        particle_xs[0][i] += box_size
-          
-    for j in range(len(particle_ys[0])): # note: particle_xs is a 2d array thus the [0]
-        
-      if particle_pos[0] - particle_ys[0][j] < - box_size / 2:
-        particle_ys[0][j] -= box_size
-          
-      elif particle_pos[0] - particle_ys[0][j] > box_size / 2:
-        particle_ys[0][j] += box_size
+    r_vectors = self.get_periodic_r_array(particle_pos_list, particle_indx)
 
     # Calculate total force now
     total_force = np.array([0,0])
-
-    for pos in particle_pos_list:
-      # don't calculate force with itsself
-      if np.array_equal(pos, particle_pos):
-        continue
-
-      distance = - (pos - particle_pos)
-
-      r = np.sqrt(distance[0]**2 + distance[1]**2)
+    for r in r_vectors:
+      r_mag = (r[0]**2 + r[1]**2)**.5
 
       # skip if the r is too big
-      if r > rcut:
+      if r_mag > rcut:
         continue
 
-      direction = distance / r
+      direction = r / r_mag
 
-      force = self.lennard_jones_force(r) * direction
+      force = self.lennard_jones_force(r_mag) * direction
 
       total_force = total_force + force
 
