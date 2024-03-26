@@ -17,7 +17,7 @@ class ParticleWorld:
     self.lattice = self.create_random_lattice(random_displacement)
 
     self.v0 = 1
-    self.dt = .001
+    self.dt = .0005
 
     self.velocities = np.empty_like(self.lattice)
     self.velocities = self.create_random_velocities(self.v0, self.velocities)
@@ -38,6 +38,9 @@ class ParticleWorld:
     a1 = 1.07457 * np.array([1, 0])
     a2 = 1.07457 * np.array([.5, .8660254])
 
+    a1 = np.array([.9, 0])
+    a2 = np.array([0, .9])
+
     new_lattice = np.array([])
 
     n = int(self.n_particles ** .5)
@@ -54,11 +57,9 @@ class ParticleWorld:
     self.width = scale * n * a1[0]
     self.height = scale * n * a2[1]
 
-    offset = .5
+    new_lattice = self.enforce_periodic_boundary_conditions(new_lattice)
 
-    new_lattice = new_lattice + offset
-
-    return self.enforce_periodic_boundary_conditions(new_lattice)
+    return new_lattice
     
 
   def create_random_lattice(self, random_displacement=.5, not_random_lattice:np.ndarray=None) -> np.ndarray:
@@ -71,7 +72,7 @@ class ParticleWorld:
       random_lattice = np.copy(not_random_lattice)
 
     for i in range(len(random_lattice)):
-      r = np.random.uniform(0, random_displacement)
+      r = np.random.normal(0, random_displacement)
       theta = np.random.uniform(0, 2 * np.pi)
       x = r * np.cos(theta)
       y = r * np.sin(theta)
@@ -114,6 +115,8 @@ class ParticleWorld:
 
 
   def plot_lattice(self):
+    print(self.width)
+    print(self.height)
     for point in self.lattice:
       plt.plot(point[0], point[1], '.')
     plt.show()
@@ -173,7 +176,7 @@ class ParticleWorld:
     
 
 
-  def calculate_net_force(self, particle_pos_list, particle_indx, box_size) -> np.ndarray:
+  def calculate_net_force(self, particle_pos_list, particle_indx) -> np.ndarray:
     '''
     Takes in a particle index and calculates the net
     force on that particle from the other particles
@@ -215,7 +218,7 @@ class ParticleWorld:
     all_force_list = []
 
     for i in range(len(pos_array)):
-      new_f = self.calculate_net_force(pos_array, i, self.width)
+      new_f = self.calculate_net_force(pos_array, i)
       all_force_list.append(new_f)
 
     

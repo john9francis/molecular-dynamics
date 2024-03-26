@@ -9,14 +9,13 @@ def main():
   # set up our own stuff
   p_world = ParticleWorld(36, random_displacement=.2)
   #p_world.plot_lattice()
-  scale = 100
 
   # Initialize Pygame
   pygame.init()
 
   # Set up the screen
-  screen_width = p_world.width * 1.5 * scale
-  screen_height = p_world.height * 1.5 * scale
+  screen_width = 800
+  screen_height = 500
   screen = pygame.display.set_mode((screen_width, screen_height))
   pygame.display.set_caption("Molecular Dynamics")
 
@@ -37,10 +36,11 @@ def main():
     screen.fill(BLACK)
 
     # draw the particles NOTE: y=0 is at the top of the screen, not the bottom
-    scale = 150
+    scale_x = screen_width / p_world.width
+    scale_y = screen_height / p_world.height
 
     for p in p_world.lattice:
-      pygame.draw.rect(screen, WHITE, (p[0] * scale, p[1] * scale, 10, 10))
+      pygame.draw.rect(screen, WHITE, (p[0] * scale_x, p[1] * scale_y, 10, 10))
 
     p_world.update()
     time.sleep(.01)
