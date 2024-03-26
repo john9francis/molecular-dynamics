@@ -6,7 +6,7 @@ class ParticleWorld:
   Creates a world with periodic boundary conditions
   '''
 
-  def __init__(self, n_particles=25, random_displacement=.1, padding=0.1) -> None:
+  def __init__(self, n_particles=25, random_displacement=.25, padding=0.1) -> None:
     self.n_particles = int(n_particles ** .5) ** 2
 
     # width and height will be defined in self.create_lattice
@@ -52,8 +52,8 @@ class ParticleWorld:
     a1 = 1.07457 * np.array([1, 0])
     a2 = 1.07457 * np.array([.5, .8660254])
 
-    a1 = np.array([1, 0])
-    a2 = np.array([0, 1])
+    # a1 = np.array([1, 0])
+    # a2 = np.array([0, 1])
 
     new_lattice = np.array([])
 
@@ -86,7 +86,7 @@ class ParticleWorld:
       random_lattice = np.copy(not_random_lattice)
 
     for i in range(len(random_lattice)):
-      r = np.random.normal(0, random_displacement)
+      r = np.random.normal(0, random_displacement / 2)
       theta = np.random.uniform(0, 2 * np.pi)
       x = r * np.cos(theta)
       y = r * np.sin(theta)
